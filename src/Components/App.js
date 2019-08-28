@@ -4,32 +4,51 @@ import Exercises from "./Exercises";
 
 import { muscles, exercises } from "../store";
 
+const allMuscles = ["All"].concat(muscles);
+const allExercises = Object.entries(
+  exercises.reduce((exercises, exercise) => {
+    let { muscles } = exercise;
+
+    exercises[muscles] = exercises[muscles]
+      ? [...exercises[muscles], exercise]
+      : [exercise];
+
+    return exercises;
+  }, {})
+);
+
 class App extends Component {
   state = {
-    exercises
+    exercises,
+    selectedExercise: null,
+    selectedMuscle: 0
   };
 
+  handleMuscleChange(event, muscle) {
+    this.setState({ selectedMuscle: muscle });
+  }
+
   getExercicesByMuscles() {
-    return Object.entries(
-      this.state.exercises.reduce((exercises, exercise) => {
-        let { muscles } = exercise;
-
-        exercises[muscles] = exercises[muscles]
-          ? [...exercises[muscles], exercise]
-          : [exercise];
-
-        return exercises;
-      }, {})
+    if (this.state.selectedMuscle === 0) return allExercises;
+    return allExercises.filter(
+      exercise => exercise[0] === allMuscles[this.state.selectedMuscle]
     );
   }
 
   render() {
-    let exercises = this.getExercicesByMuscles();
+    let exercises = this.getExercicesByMuscles(this.state.selectedExercise);
     return (
       <Fragment>
         <Header />
-        <Exercises exercises={exercises} />
-        <Footer muscles={muscles} />
+        <Exercises
+          exercises={exercises}
+          selectedExercise={this.state.selectedExercise}
+        />
+        <Footer
+          muscles={muscles}
+          handleMuscleChange={this.handleMuscleChange.bind(this)}
+          selectedMuscle={this.state.selectedMuscle}
+        />
       </Fragment>
     );
   }
